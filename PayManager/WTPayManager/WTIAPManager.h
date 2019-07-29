@@ -23,7 +23,17 @@ typedef NS_ENUM(NSUInteger,IAPResultType) {
 typedef void(^IAPCompletionHandle)(IAPResultType type,NSData *data);
 
 @interface WTIAPManager : NSObject
+/*
+    内购流程：
+ 1、检查是否支持内购
+ 2、根据传入的商品id请求苹果服务器上的商品b列表，
+ 3、验证商品正确性
+ 4、发起购买
+ 5、购买成功，根据本地购买凭证，去苹果服务器验证
+ 6、验证成功，进入自己服务器二次验证，,也可以直接进行服务器逻辑的判断
+ 7、结束本次交易
 
+ */
 
 /**
  开启内购
