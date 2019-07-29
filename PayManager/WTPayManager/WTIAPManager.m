@@ -46,11 +46,12 @@
 
 #pragma mark -- Method
 
+
 - (void)startIAPWithProductID:(NSString *)productID  completeHandle: (IAPCompletionHandle)handle {
     _handle = handle;
     if(productID && productID.length > 0) {
-        if ([SKPaymentQueue canMakePayments]) {
-            // 允许内购
+        if ([SKPaymentQueue canMakePayments]) {// 允许内购
+            //产品id
             _productID = productID;
             NSSet *set = [NSSet setWithObjects:productID, nil];
             SKProductsRequest *request = [[SKProductsRequest alloc] initWithProductIdentifiers:set];
@@ -102,7 +103,7 @@
 
 /**
  收到产品信息的回调
- 
+ 接收到产品的返回信息，然后用返回的商品信息进行发起购买请求
  @param request  请求的信息
  @param response 返回的产品信息
  */
@@ -111,6 +112,7 @@
     NSArray *productArr = response.products;
     if (productArr.count > 0) {
         SKProduct *product = nil;
+        //在商品列表里查找购买的商品
         for (SKProduct *p in productArr) {
             if ([p.productIdentifier isEqualToString:_productID]) {
                 product = p;
@@ -122,14 +124,23 @@
         // 发起内购
         [[SKPaymentQueue defaultQueue] addPayment:payMent];
         
-    } else {
+    } else {//没有商品
         [self handleActionWithType:IAPResultIDError data:nil];
     }
 }
 
+#pragma mark - SKRequestDelegate
+//请求失败
+- (void)request:(SKRequest *)request didFailWithError:(NSError *)error{
+    //请求失败的处理
+}
+
+-(void)requestDidFinish:(SKRequest *)request{
+    //请求结果
+}
 
 #pragma mark --  SKPaymentTransactionObserver
-
+//购买结果
 - (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray<SKPaymentTransaction *> *)transactions {
     // 获取结果
     // 验证成功与否都注销交易,否则会出现虚假凭证信息一直验证不通过,每次进程序都得输入苹果账号
@@ -164,13 +175,17 @@
     }
     
 }
+
 /**
  内购完成
+ 交易结束,当交易结束后还要去appstore上验证支付信息是否都正确,只有所有都正确后,我们就可以给用户方法我们的虚拟物品了。
  @param transaction 内购项目体
  */
 - (void) completeTransaction:(SKPaymentTransaction *)transaction {
     
     NSString * productIdentifier = transaction.payment.productIdentifier;
+    //从沙盒中获取交易凭证并且拼接成请求体数据
+    //appStoreReceiptURL iOS7.0增加的，购买交易完成后，会将凭据存放在该地址
     NSURL *recepitURL = [[NSBundle mainBundle] appStoreReceiptURL];
     NSData *receipt = [NSData dataWithContentsOfURL:recepitURL];
     if ([productIdentifier length] > 0 && !receipt) {
