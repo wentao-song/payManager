@@ -24,7 +24,7 @@ typedef void(^IAPCompletionHandle)(IAPResultType type,NSData *data);
 
 @interface WTIAPManager : NSObject
 /*
-    内购流程：
+    内购流程：（这里只涉及代码层面，App Store里的商品信息，银行信息等自行设置）
  1、检查是否支持内购
  2、根据传入的商品id请求苹果服务器上的商品b列表，
  3、验证商品正确性
